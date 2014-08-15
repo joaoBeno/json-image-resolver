@@ -20,7 +20,7 @@ With the brand new JSON Image Resover (JIR) you get your image urls in a simple 
 ## Thanks
 
 Thanks to Brian for [his Gist](https://gist.github.com/inspectorfegter/2982319#file-pug-bomb-php). Go pugs!!!
-Thanks to بهنام محمدی  for his reply on {StackOverflow](http://stackoverflow.com/a/22032833/1347214)
+Thanks to بهنام محمدی  for his reply n [StackOverflow](http://stackoverflow.com/a/22032833/1347214)
 
 ## License
 
