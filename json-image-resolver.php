@@ -1,9 +1,5 @@
 <?php
 // Access control
-// TODO Put it where it belongs!
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
-header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Origin, Access-Control-Allow-Methods');
 
 /**
  * Plugin Name: JSON image resolver
@@ -16,7 +12,7 @@ header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Ac
  */
 
 class Pugs_API_Endpoint{
-    
+
     /** Hook WordPress
      * @return void
      */
@@ -31,7 +27,6 @@ class Pugs_API_Endpoint{
      */
     public function add_query_vars($vars){
         $vars[] = 'jir';
-        $vars[] = 'image';
         $vars[] = 'images';
         return $vars;
     }
@@ -63,14 +58,15 @@ class Pugs_API_Endpoint{
         $query_vars = $wp->query_vars;
 
         $imgs = $query_vars['images'];
-        $img = $query_vars['image'];
 
-        //If you want everything
+        //If you want everything or just many things
         if ($imgs) {
-            $imgs = $this->display_images_from_media_library();
+
+            $param = $imgs;
+            $imgs = $this->display_images_from_media_library($imgs);
 
             if($imgs)
-                $this->send_response('200 OK', $imgs);
+                $this->send_response('ok', $imgs);
             else
                 $this->send_response('Something went wrong with the all images function');
         }
@@ -80,7 +76,7 @@ class Pugs_API_Endpoint{
             $img = $this->get_image_from_media_library($img);
 
             if($img)
-                $this->send_response('200 OK', $img);
+                $this->send_response('ok', $img);
             else
                 $this->send_response('Something went wrong with the single image function');
         }
@@ -88,60 +84,60 @@ class Pugs_API_Endpoint{
     /** Response Handler
      * This sends a JSON response to the browser
      */
-    protected function send_response($msg, $pugs = ''){
-        $response['message'] = $msg;
-        if($pugs)
-            $response['images'] = $pugs;
+    protected function send_response($msg, $json_img = ''){
+        $response['status'] = $msg;
+
+        if($json_img)
+            $response['images'] = $json_img;
+
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
+        header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Origin, Access-Control-Allow-Methods');
         header('content-type: application/json; charset=utf-8');
+
         echo json_encode($response)."\n";
+
         exit;
     }
 
-    protected function get_images_from_media_library() {
+    protected function get_images_from_media_library($all_images) {
         $args = array(
             'post_type' => 'attachment',
             'post_mime_type' =>'image',
             'post_status' => 'inherit',
-            'posts_per_page' => 5,
             'orderby' => 'rand'
         );
         $query_images = new WP_Query( $args );
         $images = array();
         foreach ( $query_images->posts as $image) {
-            $l_image = array();
+            if ($all_images === "all") {
+                $l_image = array();
 
-            $l_image[]=$image->ID;
-            $l_image[]=$image->guid;
+                $l_image[]=$image->ID;
+                $l_image[]=$image->guid;
 
-            $images[]= $l_image;
+                $images[]= $l_image;
+            } else if (is_string($all_images)) {
+                $img_ids = explode(",",$all_images);
+                $img_id = intval($image->ID);
+                foreach ($img_ids as $iid) {
+                    if ($img_id == intval($iid)) {
+                        $l_image = array();
+
+                        $l_image["id"]=$image->ID;
+                        $l_image["url"]=$image->guid;
+
+                        $images[]= $l_image;
+                    }
+                }
+            }
         }
         return $images;
     }
 
-    protected function get_image_from_media_library($image_id) {
-        $args = array(
-            'post_type' => 'attachment',
-            'post_mime_type' =>'image',
-            'post_status' => 'inherit',
-            'posts_per_page' => 5,
-            'orderby' => 'rand'
-        );
-        $query_images = new WP_Query( $args );
-        $image_return = "";
-        foreach ( $query_images->posts as $image) {
-            $image_id = intval($image->ID);
-            if($image_id == intval($image_id)) {
-                $image_return = $image->guid;
-            } else {
-                $image_return = "Image not found!".intval($image_id);
-            }
-        }
-        return $image_return;
-    }
+    protected function display_images_from_media_library($all_or_some = true) {
 
-    protected function display_images_from_media_library() {
-
-        $imgs = $this->get_images_from_media_library();
+        $imgs = $this->get_images_from_media_library($all_or_some);
         $html = array();
 
         foreach($imgs as $img) {
