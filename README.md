@@ -13,7 +13,7 @@ With the brand new JSON Image Resover (JIR) you get your image urls in a simple 
 1. Install the plugin
 2. Get json:
 
-> http://your-site/wordpress-subdomain/?jir=1&image=**image-id**  
+> http://your-site/wordpress-subdomain/?jir=1&images=**image-id**
 > http://your-site/wordpress-subdomain/?jir=1&images=**image-id**,**image-id**,...  
 > http://your-site/wordpress-subdomain/?jir=1&images=**all**  
 
