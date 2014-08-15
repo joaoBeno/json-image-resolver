@@ -17,6 +17,11 @@ With the brand new JSON Image Resover (JIR) you get your image urls in a simple 
 > http://your-site/wordpress-subdomain/?jir=1&images=**image-id**,**image-id**,...  
 > http://your-site/wordpress-subdomain/?jir=1&images=**all**  
 
-## License?
+## Thanks
 
-Open Source
+Thanks to Brian for [his Gist](https://gist.github.com/inspectorfegter/2982319#file-pug-bomb-php). Go pugs!!!
+Thanks to بهنام محمدی  for his reply on {StackOverflow](http://stackoverflow.com/a/22032833/1347214)
+
+## License
+
+GPL v2

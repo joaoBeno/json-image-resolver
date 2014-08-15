@@ -8,7 +8,7 @@
  * Version: 0.0.1
  * Author: João Beno Schreiner Junior
  * Author URI: http://joao.beno.net.br
- * License: Open Source
+ * License: GPL v2
  */
 
 class Pugs_API_Endpoint{
