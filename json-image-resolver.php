@@ -1,17 +1,15 @@
 <?php
-// Access control
-
 /**
  * Plugin Name: JSON image resolver
  * Plugin URI: http://URI_Of_Page_Describing_Plugin_and_Updates
  * Description: Get one or more images from wordpress media library.
- * Version: 0.0.1
+ * Version: 1.0.0
  * Author: João Beno Schreiner Junior
  * Author URI: http://joao.beno.net.br
- * License: GPL v2
+ * License: GPLv2
  */
 
-class Pugs_API_Endpoint{
+class Images_API_Endpoint{
 
     /** Hook WordPress
      * @return void
@@ -70,16 +68,6 @@ class Pugs_API_Endpoint{
             else
                 $this->send_response('Something went wrong with the all images function');
         }
-
-        //If you want just THE one...
-        if ($img) {
-            $img = $this->get_image_from_media_library($img);
-
-            if($img)
-                $this->send_response('ok', $img);
-            else
-                $this->send_response('Something went wrong with the single image function');
-        }
     }
     /** Response Handler
      * This sends a JSON response to the browser
@@ -87,8 +75,10 @@ class Pugs_API_Endpoint{
     protected function send_response($msg, $json_img = ''){
         $response['status'] = $msg;
 
-        if($json_img)
+        if ($json_img) {
+            $response['count'] = count($json_img);
             $response['images'] = $json_img;
+        }
 
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
@@ -105,7 +95,7 @@ class Pugs_API_Endpoint{
             'post_type' => 'attachment',
             'post_mime_type' =>'image',
             'post_status' => 'inherit',
-            'orderby' => 'rand'
+            'posts_per_page' => -1
         );
         $query_images = new WP_Query( $args );
         $images = array();
@@ -113,11 +103,14 @@ class Pugs_API_Endpoint{
             if ($all_images === "all") {
                 $l_image = array();
 
-                $l_image[]=$image->ID;
-                $l_image[]=$image->guid;
+                $l_image["id"]=$image->ID;
+                $l_image["url"]=$image->guid;
+                $l_image["description"]=$image->post_content;
+                $l_image["title"]=$image->post_title;
+                $l_image["caption"]=$image->post_excerpt;
 
                 $images[]= $l_image;
-            } else if (is_string($all_images)) {
+            } else if (is_string($all_images) && strpos($all_images,",")) {
                 $img_ids = explode(",",$all_images);
                 $img_id = intval($image->ID);
                 foreach ($img_ids as $iid) {
@@ -126,12 +119,32 @@ class Pugs_API_Endpoint{
 
                         $l_image["id"]=$image->ID;
                         $l_image["url"]=$image->guid;
+                        $l_image["description"]=$image->post_content;
+                        $l_image["title"]=$image->post_title;
+                        $l_image["caption"]=$image->post_excerpt;
 
                         $images[]= $l_image;
                     }
                 }
+            } else {
+                $req_id = intval($all_images);
+                $img_id = intval($image->ID);
+
+                if ($img_id == $req_id) {
+                    $l_image = array();
+
+                    $l_image["id"]=$image->ID;
+                    $l_image["url"]=$image->guid;
+                    $l_image["description"]=$image->post_content;
+                    $l_image["title"]=$image->post_title;
+                    $l_image["caption"]=$image->post_excerpt;
+
+                    $images[]= $l_image;
+                }
+
             }
         }
+
         return $images;
     }
 
@@ -147,4 +160,4 @@ class Pugs_API_Endpoint{
         return $html;
     }
 }
-new Pugs_API_Endpoint();
+new Images_API_Endpoint();
